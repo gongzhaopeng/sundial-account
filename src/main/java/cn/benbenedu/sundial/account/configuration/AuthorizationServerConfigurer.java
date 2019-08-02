@@ -10,15 +10,20 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
+import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
+import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
@@ -28,12 +33,20 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 import java.util.Set;
 
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfigurer
         extends AuthorizationServerConfigurerAdapter {
+
+    final private Map<String, String> CORS_HEADERS = Map.of(
+            "Access-Control-Allow-Origin", "*",
+            "Access-Control-Allow-Methods", "*",
+            "Access-Control-Max-Age", "3600",
+            "Access-Control-Allow-Headers", "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN"
+    );
 
     private ClientRepository clientRepository;
     private ClientDetailsService clientDetailsService;
@@ -82,6 +95,10 @@ public class AuthorizationServerConfigurer
 
         security.tokenKeyAccess("permitAll()");
         security.addTokenEndpointAuthenticationFilter(customCorsFilter());
+
+        final var accessDeniedHandler = new OAuth2AccessDeniedHandler();
+        accessDeniedHandler.setExceptionTranslator(webResponseExceptionTranslator());
+        security.accessDeniedHandler(accessDeniedHandler);
     }
 
     @Bean
@@ -100,11 +117,7 @@ public class AuthorizationServerConfigurer
             final var response = (HttpServletResponse) servletResponse;
             final var request = (HttpServletRequest) servletRequest;
 
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Methods", "*");
-            response.setHeader("Access-Control-Max-Age", "3600");
-            response.setHeader("Access-Control-Allow-Headers",
-                    "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN");
+            CORS_HEADERS.forEach(response::setHeader);
 
             if (HttpMethod.OPTIONS.name()
                     .equalsIgnoreCase(request.getMethod())) {
@@ -112,6 +125,25 @@ public class AuthorizationServerConfigurer
                 response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 filterChain.doFilter(servletRequest, servletResponse);
+            }
+        };
+    }
+
+    @Bean
+    public WebResponseExceptionTranslator<OAuth2Exception> webResponseExceptionTranslator() {
+
+        return new DefaultWebResponseExceptionTranslator() {
+
+            @Override
+            public ResponseEntity<OAuth2Exception> translate(Exception e)
+                    throws Exception {
+
+                final var responseEntity = super.translate(e);
+
+                final var headers = responseEntity.getHeaders();
+                CORS_HEADERS.forEach(headers::add);
+
+                return responseEntity;
             }
         };
     }
