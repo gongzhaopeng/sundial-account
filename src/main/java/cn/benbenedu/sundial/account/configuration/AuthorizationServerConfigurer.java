@@ -89,7 +89,7 @@ public class AuthorizationServerConfigurer
         security.passwordEncoder(NoOpPasswordEncoder.getInstance());
 
         security.tokenKeyAccess("permitAll()");
-        security.addTokenEndpointAuthenticationFilter(customCorsFilter());
+//        security.addTokenEndpointAuthenticationFilter(customCorsFilter());
     }
 
     @Bean
@@ -97,28 +97,28 @@ public class AuthorizationServerConfigurer
         return new RedisTokenStore(redisConnectionFactory);
     }
 
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public Filter customCorsFilter() {
-
-        return (ServletRequest servletRequest,
-                ServletResponse servletResponse,
-                FilterChain filterChain) -> {
-
-            final var response = (HttpServletResponse) servletResponse;
-            final var request = (HttpServletRequest) servletRequest;
-
-            CORS_HEADERS.forEach(response::setHeader);
-
-            if (HttpMethod.OPTIONS.name()
-                    .equalsIgnoreCase(request.getMethod())) {
-
-                response.setStatus(HttpServletResponse.SC_OK);
-            } else {
-                filterChain.doFilter(servletRequest, servletResponse);
-            }
-        };
-    }
+//    @Bean
+//    @Order(Ordered.HIGHEST_PRECEDENCE)
+//    public Filter customCorsFilter() {
+//
+//        return (ServletRequest servletRequest,
+//                ServletResponse servletResponse,
+//                FilterChain filterChain) -> {
+//
+//            final var response = (HttpServletResponse) servletResponse;
+//            final var request = (HttpServletRequest) servletRequest;
+//
+//            CORS_HEADERS.forEach(response::setHeader);
+//
+//            if (HttpMethod.OPTIONS.name()
+//                    .equalsIgnoreCase(request.getMethod())) {
+//
+//                response.setStatus(HttpServletResponse.SC_OK);
+//            } else {
+//                filterChain.doFilter(servletRequest, servletResponse);
+//            }
+//        };
+//    }
 
     private void initSundialCoreClient() {
 
