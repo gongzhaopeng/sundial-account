@@ -1,5 +1,6 @@
 package cn.benbenedu.sundial.account.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +20,9 @@ public class SundialUserDetails
         final var userDetails = new SundialUserDetails();
 
         userDetails.setPassword(account.getPassword());
-        userDetails.setUsername(account.getId());
+        userDetails.setId(account.getId());
+        userDetails.setName(account.getName());
+        userDetails.setNickname(account.getNickname());
         userDetails.setAuthorities(
                 Optional.ofNullable(account.getRoles())
                         .map(roles -> roles.stream().map(
@@ -37,12 +40,21 @@ public class SundialUserDetails
     }
 
     private String password;
-    private String username;
+    private String id;
     private Set<GrantedAuthority> authorities;
     private boolean accountNonExpired;
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
     private boolean enabled;
+
+    private String name;
+    private String nickname;
+
+    @Override
+    @JsonIgnore
+    public String getUsername() {
+        return null;
+    }
 
     public void eraseCredentials() {
         password = null;
