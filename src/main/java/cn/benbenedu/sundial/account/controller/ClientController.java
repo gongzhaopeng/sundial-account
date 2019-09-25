@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -61,16 +62,12 @@ public class ClientController {
         newClient.setCreateTime(now);
         newClient.setLUTime(now);
 
-        final var creator = new Creator();
-        creator.setId(auth.getName());
-        newClient.setCreator(creator);
+        newClient.setCreator(
+                Creator.of((Map) auth.getPrincipal()));
 
         newClient.setState(ClientState.Unactivated);
 
-        final var owner = new Owner();
-        owner.setId(ownerAccount.getId());
-        owner.setName(ownerAccount.getName());
-        owner.setNickname(ownerAccount.getNickname());
+        newClient.setOwner(Owner.of(ownerAccount));
 
         newClient.setClientSecret(
                 RandomStringUtils.randomAlphanumeric(64));

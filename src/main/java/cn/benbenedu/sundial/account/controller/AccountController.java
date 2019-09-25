@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/genesis/accounts")
@@ -55,9 +56,8 @@ public class AccountController {
         newAccount.setCreateTime(now);
         newAccount.setLUTime(now);
 
-        final var creator = new Creator();
-        creator.setId(auth.getName());
-        newAccount.setCreator(creator);
+        newAccount.setCreator(
+                Creator.of((Map) auth.getPrincipal()));
 
         newAccount.setState(AccountState.Unactivated);
 
