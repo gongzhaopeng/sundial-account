@@ -5,11 +5,11 @@
     <parent>
         <groupId>cn.benbenedu.sundial</groupId>
         <artifactId>titan</artifactId>
-        <version>0.4</version>
+        <version>0.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <artifactId>account</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.2</version>
     <name>account</name>
     <description>Account service for sundial cloud.</description>
 
