@@ -14,7 +14,7 @@ public class Creator {
         final var creator = new Creator();
         creator.setId(userDetails.getId());
         creator.setName(userDetails.getName());
-        creator.setName(userDetails.getNickname());
+        creator.setNickname(userDetails.getNickname());
 
         return creator;
     }
