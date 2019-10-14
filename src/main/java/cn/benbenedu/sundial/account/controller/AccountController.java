@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/genesis/accounts")
@@ -43,9 +43,9 @@ public class AccountController {
             OAuth2Authentication auth) {
 
         if (accountRepository.existsByIdNumberOrMobileOrEmail(
-                accountCreatingReq.idNumber,
-                accountCreatingReq.mobile,
-                accountCreatingReq.email)) {
+                Optional.ofNullable(accountCreatingReq.idNumber).orElse("__INVALID_ID_NUMBER__"),
+                Optional.ofNullable(accountCreatingReq.mobile).orElse("__INVALID_MOBILE__"),
+                Optional.ofNullable(accountCreatingReq.email).orElse("__INVALID_EMAIL__"))) {
             throw new IllegalArgumentException(
                     "Exclusive properties have been occupied.");
         }
@@ -56,8 +56,8 @@ public class AccountController {
         newAccount.setCreateTime(now);
         newAccount.setLUTime(now);
 
-        newAccount.setCreator(
-                Creator.of((Map) auth.getPrincipal()));
+        final var authUserDetails = (SundialUserDetails) auth.getPrincipal();
+        newAccount.setCreator(Creator.of(authUserDetails));
 
         newAccount.setState(AccountState.Unactivated);
 

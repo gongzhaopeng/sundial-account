@@ -1,9 +1,6 @@
 package cn.benbenedu.sundial.account.controller;
 
-import cn.benbenedu.sundial.account.model.Client;
-import cn.benbenedu.sundial.account.model.ClientState;
-import cn.benbenedu.sundial.account.model.Creator;
-import cn.benbenedu.sundial.account.model.Owner;
+import cn.benbenedu.sundial.account.model.*;
 import cn.benbenedu.sundial.account.repository.AccountRepository;
 import cn.benbenedu.sundial.account.repository.ClientRepository;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,7 +15,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -62,8 +58,8 @@ public class ClientController {
         newClient.setCreateTime(now);
         newClient.setLUTime(now);
 
-        newClient.setCreator(
-                Creator.of((Map) auth.getPrincipal()));
+        final var authUserDetails = (SundialUserDetails) auth.getPrincipal();
+        newClient.setCreator(Creator.of(authUserDetails));
 
         newClient.setState(ClientState.Unactivated);
 

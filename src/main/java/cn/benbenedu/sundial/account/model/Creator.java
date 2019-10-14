@@ -2,8 +2,6 @@ package cn.benbenedu.sundial.account.model;
 
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
 public class Creator {
 
@@ -11,12 +9,12 @@ public class Creator {
     private String name;
     private String nickname;
 
-    public static Creator of(Map properties) {
+    public static Creator of(SundialUserDetails userDetails) {
 
         final var creator = new Creator();
-        creator.setId((String) properties.get("id"));
-        creator.setName((String) properties.get("name"));
-        creator.setName((String) properties.get("nickname"));
+        creator.setId(userDetails.getId());
+        creator.setName(userDetails.getName());
+        creator.setName(userDetails.getNickname());
 
         return creator;
     }

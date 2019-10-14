@@ -41,6 +41,7 @@ public class SundialUserDetails
 
     private String password;
     private String id;
+    @JsonIgnore
     private Set<GrantedAuthority> authorities;
     private boolean accountNonExpired;
     private boolean accountNonLocked;
@@ -53,7 +54,13 @@ public class SundialUserDetails
     @Override
     @JsonIgnore
     public String getUsername() {
-        return null;
+        return id;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return password;
     }
 
     public void eraseCredentials() {
